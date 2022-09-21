@@ -4,7 +4,7 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { useEffect, useState } from "react";
 import { DrawPanel } from "../components";
-import { GraphPanel } from "../components/GraphPanel";
+import { GraphPanel } from "../components/OfflineGraphPanel";
 import { trpc } from "../utils/trpc";
 
 type TechnologyCardProps = {

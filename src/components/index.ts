@@ -1,1 +1,1 @@
-export * from "./DrawPanel";
+export * from "./OfflineDrawPanel";

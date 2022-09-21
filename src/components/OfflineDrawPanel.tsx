@@ -5,6 +5,7 @@ import {
   ExcalidrawAPIRefValue,
 } from "@excalidraw/excalidraw/types/types";
 import { useEffect, useRef, useState } from "react";
+import { Node } from "../types";
 
 type DrawPanelProps = {
   SelectedNodeId: string;
@@ -57,65 +58,61 @@ export const DrawPanel = (props: DrawPanelProps) => {
     state: AppState,
     files: BinaryFiles
   ) => {
-    console.log(JSON.stringify(elements));
+    const elems = elements.map((elem) => {
+      return elem;
+    });
+
+    const nodes = JSON.parse(localStorage.getItem("nodes") || "[]")
+    const node = nodes.find((n: any) => n.data.id === props.SelectedNodeId);
+    if(node){
+      localStorage.setItem("nodes", 
+      JSON.stringify([
+        ...nodes.filter((n: any) => n.data.id !== props.SelectedNodeId),
+        {
+          ...node,
+          data: {
+            ...node.data,
+            body : elems
+          },
+        },
+      ])
+    );
+    }
   };
 
   useEffect(() => {
-    const fetchRootData = async (id: string): Promise<DrawElement[]> => {
+    const fetchRootData = (id: string): ExcalidrawElement[] => {
       if (id === "") {
         return [];
       }
-      return [
-        {
-          id: "UigKpJFHiPzj3Z2cVePG4",
-          type: "text",
-          x: 132,
-          y: 164,
-          width: 21,
-          height: 27,
-          angle: 0,
-          strokeColor: "#000000",
-          backgroundColor: "transparent",
-          fillStyle: "hachure",
-          strokeWidth: 1,
-          strokeStyle: "solid",
-          roughness: 1,
-          opacity: 100,
-          groupIds: [],
-          strokeSharpness: "sharp",
-          seed: 787056157,
-          version: 4,
-          versionNonce: 1722808275,
-          isDeleted: false,
-          boundElements: null,
-          updated: 1660531784713,
-          link: null,
-          locked: false,
-          text: "Custom Text",
-          fontSize: 20,
-          fontFamily: 1,
-          textAlign: "left",
-          verticalAlign: "top",
-          baseline: 22,
-          containerId: null,
-          originalText: "Custom Text",
-        },
-      ];
+      
+      const nodesStr = localStorage.getItem("nodes") || "[]"
+      console.log("here",nodesStr || "[]");
+      
+      const node: Node = JSON.parse(localStorage.getItem("nodes") || "[]").find(
+        (n: Node) => n.data.id === id
+      );
+      console.log("node",node);
+      
+      if (node) {
+        return node.data.body;
+      }
+      return [];
+
     };
 
     console.log(props.SelectedNodeId);
 
-    fetchRootData(props.SelectedNodeId).then((data) => {
-      const excali = excalidrawRef.current;
-      const ready = excali?.ready;
-      if (ready) {
-        excali.updateScene({
-          elements: data,
-          appState: {},
-        });
-        excali.scrollToContent();
-      }
-    });
+    const data = fetchRootData(props.SelectedNodeId)
+    const excali = excalidrawRef.current;
+    const ready = excali?.ready;
+    if (ready) {
+      excali.updateScene({
+        elements: data,
+        appState: {},
+      });
+      excali.scrollToContent();
+    }
   }, [props.SelectedNodeId]);
 
   useEffect(() => {
